@@ -44,6 +44,8 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
+	/* jshint esnext: true */
+
 	"use strict";
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
@@ -152,7 +154,7 @@
 	}
 
 	// Read physical file
-	var source = _fs2["default"].readFileSync(file);
+	var source = _fs2["default"].readFileSync(file).toString();
 	var ast = (0, _acornJsx.parse)(source, {
 	  ecmaVersion: 6,
 	  sourceType: 'module',
@@ -219,13 +221,47 @@
 	});
 
 	//const repeat = maxRepeat(result);
-	var repeat = new SuffixTree(result).node.getLongestRepeatedSubString();
-	var index = result.indexOf(repeat);
-	console.log(result);
-	console.log(reverseMapping);
-	console.log(repeat);
-	console.log(index);
-	console.log(indexes[index]);
+	var root = new SuffixTree(result).node;
+	var repeat = root.getLongestRepeatedSubString();
+
+	var highlightPattern = function highlightPattern(str, pattern) {
+	  var onlyRepeatedStr = '';
+	  var lastMatchIndex = 0;
+	  var spaces = function spaces(n) {
+	    return new Array(n).fill(' ').join('');
+	  };
+
+	  while (true) {
+	    lastMatchIndex = result.indexOf(pattern, lastMatchIndex);
+	    if (lastMatchIndex < 0) {
+	      break;
+	    }
+	    onlyRepeatedStr += spaces(lastMatchIndex) + pattern;
+	    lastMatchIndex += pattern.length;
+	  }
+
+	  console.log(str);
+	  console.log(onlyRepeatedStr);
+	};
+
+	highlightPattern(result, repeat);
+
+	var shift = 0;
+
+	while (true) {
+	  var index = result.indexOf(repeat);
+	  if (index < 0) {
+	    break;
+	  }
+
+	  result = result.substring(index + repeat.length);
+	  var start = indexes[shift + index].start;
+	  var end = indexes[shift + index + repeat.length - 1].end;
+
+	  console.log(start, end);
+	  console.log(source.substring(start, end));
+	  shift += index + repeat.length;
+	}
 
 /***/ },
 /* 1 */
@@ -287,7 +323,6 @@
 	  if (!base) base = exports.base;(function c(node, st, override) {
 	    var type = override || node.type,
 	        found = visitors[type];
-	    //console.log(type);
 	    base[type](node, st, c);
 	    if (found) found(node, st);
 	  })(node, state, override);

@@ -1,3 +1,4 @@
+/* jshint esnext: true */
 
 
 
@@ -100,7 +101,7 @@ if (!file) {
 }
 
 // Read physical file
-const source = fs.readFileSync(file);
+const source = fs.readFileSync(file).toString();
 const ast = parse(source, {
   ecmaVersion: 6,
   sourceType: 'module',
@@ -165,32 +166,43 @@ walk(ast, {
 });
 
 //const repeat = maxRepeat(result);
-const repeat = new SuffixTree(result).node.getLongestRepeatedSubString();
-var index = result.indexOf(repeat);
-console.log(result);
-console.log(reverseMapping);
-console.log(repeat);
-console.log(index);
-console.log(indexes[index]);
+const root = new SuffixTree(result).node;
+const repeat = root.getLongestRepeatedSubString();
+
+const highlightPattern = (str, pattern) => {
+  let onlyRepeatedStr = '';
+  let lastMatchIndex = 0;
+  const spaces = (n) => new Array(n).fill(' ').join('');
+
+  while (true) {
+    lastMatchIndex = result.indexOf(pattern, lastMatchIndex);
+    if (lastMatchIndex < 0) {
+      break;
+    }
+    onlyRepeatedStr += spaces(lastMatchIndex) + pattern;
+    lastMatchIndex += pattern.length;
+  }
+
+  console.log(str);
+  console.log(onlyRepeatedStr);
+};
+
+highlightPattern(result, repeat);
 
 
+let shift = 0;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+while (true) {
+  var index = result.indexOf(repeat);
+  if (index < 0) {
+    break;
+  }
+  
+  result = result.substring(index + repeat.length);
+  const start = indexes[shift+index].start;
+  const end = indexes[shift+index+repeat.length - 1].end;
+   
+  console.log(start, end);
+  console.log(source.substring(start, end));
+  shift += index + repeat.length;
+}
