@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "acorn-jsx": "^2.0.0"
+    "acorn-jsx": "^2.0.0",
+    "number-converter-alphabet": "^1.1.0"
   },
   "devDependencies": {
     "async": "^1.4.2",
