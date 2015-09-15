@@ -1,11 +1,32 @@
+import fs from 'fs';
 import path from 'path';
 import createAST, { base } from 'acorn-jsx-walk';
 import ellipsis from 'text-ellipsis';
 import oneliner from 'one-liner';
 import convert, { generator } from 'number-converter-alphabet';
+import minimist from 'minimist';
 
 import getLongestRepeatedSubstring from './src/longestRepeatedString.js';
 import getAllFilesContentInOneString from './src/getAllFilesContentInOneString.js';
+
+const argv = minimist(process.argv.slice(2));
+let folder = argv['_'][0];
+
+if (folder) {
+  try {
+    const stats = fs.statSync(folder);
+    if (!stats.isDirectory()) {
+      console.error(folder, 'is not a directory');
+      process.exit(1);
+    }
+  } catch (err) {
+    console.error(err.message);
+    process.exit(2);
+  }
+} else {
+  folder = '.'; // current folder, no need to check anything
+}
+
 
 // we are going to encode all tokens to one letter
 const nextUniqueId = generator('0123456789abcdefghijklmnopqrstuvwyxzABCDEFGHIJKLMNOPQRSTUVWYXZ[]{}&$#~çù!:;,./-+*^');
@@ -41,7 +62,7 @@ const { walkOptions, mapping, reverseMapping } =
   });
 
 
-getAllFilesContentInOneString().then(str => {
+getAllFilesContentInOneString(folder).then(str => {
 
   // parse the string (containing every .js file contents)
   // into one big AST
@@ -50,15 +71,23 @@ getAllFilesContentInOneString().then(str => {
   // Find the longest repeated tokens sequence
   const repeat = getLongestRepeatedSubstring(encodedString);
 
+  if (repeat.length === 0) {
+    console.log('no repeated code found, great!');
+    process.exit(0);
+  }
+
   // Display the code corresponding to the longest repeated pattern
   let lastMatchIndex = -1;
   while ((lastMatchIndex = encodedString.indexOf(repeat, lastMatchIndex)) >= 0) {
     const start = indexes[lastMatchIndex].start;
     const end = indexes[lastMatchIndex + repeat.length - 1].end;
      
-    console.log(ellipsis(oneliner(str.substring(start, end)), 200));
+    console.log('----------');
+    console.log(ellipsis(str.substring(start, end)), 200);
 
     lastMatchIndex += repeat.length;
   }
 
+}).catch(e => {
+  console.error(e.message);
 });

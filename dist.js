@@ -48,33 +48,59 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _path = __webpack_require__(1);
+	var _fs = __webpack_require__(1);
+
+	var _fs2 = _interopRequireDefault(_fs);
+
+	var _path = __webpack_require__(2);
 
 	var _path2 = _interopRequireDefault(_path);
 
-	var _acornJsxWalk = __webpack_require__(2);
+	var _acornJsxWalk = __webpack_require__(3);
 
 	var _acornJsxWalk2 = _interopRequireDefault(_acornJsxWalk);
 
-	var _textEllipsis = __webpack_require__(3);
+	var _textEllipsis = __webpack_require__(4);
 
 	var _textEllipsis2 = _interopRequireDefault(_textEllipsis);
 
-	var _oneLiner = __webpack_require__(4);
+	var _oneLiner = __webpack_require__(5);
 
 	var _oneLiner2 = _interopRequireDefault(_oneLiner);
 
-	var _numberConverterAlphabet = __webpack_require__(5);
+	var _numberConverterAlphabet = __webpack_require__(6);
 
 	var _numberConverterAlphabet2 = _interopRequireDefault(_numberConverterAlphabet);
 
-	var _srcLongestRepeatedStringJs = __webpack_require__(6);
+	var _minimist = __webpack_require__(7);
+
+	var _minimist2 = _interopRequireDefault(_minimist);
+
+	var _srcLongestRepeatedStringJs = __webpack_require__(8);
 
 	var _srcLongestRepeatedStringJs2 = _interopRequireDefault(_srcLongestRepeatedStringJs);
 
-	var _srcGetAllFilesContentInOneStringJs = __webpack_require__(7);
+	var _srcGetAllFilesContentInOneStringJs = __webpack_require__(9);
 
 	var _srcGetAllFilesContentInOneStringJs2 = _interopRequireDefault(_srcGetAllFilesContentInOneStringJs);
+
+	var argv = (0, _minimist2['default'])(process.argv.slice(2));
+	var folder = argv['_'][0];
+
+	if (folder) {
+	  try {
+	    var stats = _fs2['default'].statSync(folder);
+	    if (!stats.isDirectory()) {
+	      console.error(folder, 'is not a directory');
+	      process.exit(1);
+	    }
+	  } catch (err) {
+	    console.error(err.message);
+	    process.exit(2);
+	  }
+	} else {
+	  folder = '.'; // current folder, no need to check anything
+	}
 
 	// we are going to encode all tokens to one letter
 	var nextUniqueId = (0, _numberConverterAlphabet.generator)('0123456789abcdefghijklmnopqrstuvwyxzABCDEFGHIJKLMNOPQRSTUVWYXZ[]{}&$#~çù!:;,./-+*^');
@@ -113,7 +139,7 @@
 	var mapping = _Object$keys$reduce.mapping;
 	var reverseMapping = _Object$keys$reduce.reverseMapping;
 
-	(0, _srcGetAllFilesContentInOneStringJs2['default'])().then(function (str) {
+	(0, _srcGetAllFilesContentInOneStringJs2['default'])(folder).then(function (str) {
 
 	  // parse the string (containing every .js file contents)
 	  // into one big AST
@@ -122,50 +148,70 @@
 	  // Find the longest repeated tokens sequence
 	  var repeat = (0, _srcLongestRepeatedStringJs2['default'])(encodedString);
 
+	  if (repeat.length === 0) {
+	    console.log('no repeated code found, great!');
+	    process.exit(0);
+	  }
+
 	  // Display the code corresponding to the longest repeated pattern
 	  var lastMatchIndex = -1;
 	  while ((lastMatchIndex = encodedString.indexOf(repeat, lastMatchIndex)) >= 0) {
 	    var start = indexes[lastMatchIndex].start;
 	    var end = indexes[lastMatchIndex + repeat.length - 1].end;
 
-	    console.log((0, _textEllipsis2['default'])((0, _oneLiner2['default'])(str.substring(start, end)), 200));
+	    console.log('----------');
+	    console.log((0, _textEllipsis2['default'])(str.substring(start, end)), 200);
 
 	    lastMatchIndex += repeat.length;
 	  }
+	})['catch'](function (e) {
+	  console.error(e.message);
 	});
 
 /***/ },
 /* 1 */
 /***/ function(module, exports) {
 
-	module.exports = require("path");
+	module.exports = require("fs");
 
 /***/ },
 /* 2 */
 /***/ function(module, exports) {
 
-	module.exports = require("acorn-jsx-walk");
+	module.exports = require("path");
 
 /***/ },
 /* 3 */
 /***/ function(module, exports) {
 
-	module.exports = require("text-ellipsis");
+	module.exports = require("acorn-jsx-walk");
 
 /***/ },
 /* 4 */
 /***/ function(module, exports) {
 
-	module.exports = require("one-liner");
+	module.exports = require("text-ellipsis");
 
 /***/ },
 /* 5 */
 /***/ function(module, exports) {
 
-	module.exports = require("number-converter-alphabet");
+	module.exports = require("one-liner");
 
 /***/ },
 /* 6 */
+/***/ function(module, exports) {
+
+	module.exports = require("number-converter-alphabet");
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	module.exports = require("minimist");
+
+/***/ },
+/* 8 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -243,7 +289,7 @@
 	module.exports = exports["default"];
 
 /***/ },
-/* 7 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -255,15 +301,19 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-	var _fs = __webpack_require__(8);
+	var _fs = __webpack_require__(1);
 
 	var _fs2 = _interopRequireDefault(_fs);
 
-	var _globby = __webpack_require__(9);
+	var _path = __webpack_require__(2);
+
+	var _path2 = _interopRequireDefault(_path);
+
+	var _globby = __webpack_require__(10);
 
 	var _globby2 = _interopRequireDefault(_globby);
 
-	var _async = __webpack_require__(10);
+	var _async = __webpack_require__(11);
 
 	var _async2 = _interopRequireDefault(_async);
 
@@ -272,20 +322,20 @@
 	 * all the content of all its files.
 	 */
 
-	function getAllFileContentInOneString() {
+	function getAllFileContentInOneString(folder) {
 	  return new Promise(function (resolve, reject) {
 	    var jsGlob = ['**/*.js', '!node_modules/**'];
 	    var options = {};
-	    var createTasksToReadFiles = function createTasksToReadFiles(files) {
-	      return files.map(function (fileName) {
-	        return function (callback) {
-	          return _fs2['default'].readFile(fileName, callback);
-	        };
-	      });
-	    };
 
-	    (0, _globby2['default'])(jsGlob).then(function (paths) {
-	      _async2['default'].parallel(createTasksToReadFiles(paths), function (err, results) {
+	    (0, _globby2['default'])(jsGlob, { cwd: folder }).then(function (paths) {
+	      // paths = [ 'a.js' ]
+	      // but we want the full path in front of it, we can be outside of '.'
+	      paths = paths.map(function (p) {
+	        return _path2['default'].resolve(folder, p);
+	      });
+	      console.log(paths.join('\n'));
+
+	      _async2['default'].map(paths, _fs2['default'].readFile, function (err, results) {
 	        if (err) {
 	          reject(err);
 	        } else {
@@ -300,19 +350,13 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 8 */
-/***/ function(module, exports) {
-
-	module.exports = require("fs");
-
-/***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports) {
 
 	module.exports = require("globby");
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports) {
 
 	module.exports = require("async");
